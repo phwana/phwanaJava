@@ -1,12 +1,12 @@
 package com.phwana.day05.recap;
 
 import java.util.Scanner;
-
+//변수->배열->클래스 ??
 public class StudentAppArray {
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
 		int [] scores = new int[3];
-		
+		end: //변수명처럼 쓰면 편리하게 쓸수있는
 		finish:
 		while(true) {
 			System.out.println("====== 메인 메뉴 ======");
