@@ -74,6 +74,7 @@ public class StudentManage implements ManageInterface{
 		// TODO Auto-generated method stub
 		return sList;
 	}
+	
 //바로 출력하지 않고 스트링으로 모아서 컨트롤로 보낸다
 	public String searchfailResult(Student student) {//이름으로 찾은 학생 정보 넘어옴
 		if(student != null) {//정보 있을 때 동작
