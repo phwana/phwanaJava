@@ -14,11 +14,30 @@ public class Exercise_ImageCopy {
 		OutputStream os = null;
 		
 		try {
-			
+			//입력스트림을 사용해서 읽어와야 해. 코드를 적어
+			is = new FileInputStream("C:\\Windows\\Web\\Wallpaper\\Windows\\img0.jpg");
+			os = new FileOutputStream("C:\\Temp\\copying.jpg");
+			int readCount;
+			byte[]readBytes = new byte[1024]; //1KB씩 읽어내는 것
+			while(true) {
+				readCount = is.read(readBytes);
+				if(readCount == -1) break;//다 읽었으면 멈춰
+				//읽은 내용은 목적지 파일에 저장해야 해. 코드를 적어
+				os.write(readBytes, 0, readCount);
+				//flush() 해주어야 해. 코드를 적어
+				os.flush();
+			}
+			System.out.println("파일 복사 완료");
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
-			//close
+			//close() 해주어야 해. 코드를 적어
+			try {
+				os.close();
+				is.close();
+			}catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
