@@ -1,5 +1,9 @@
 package com.phwana.jdbc.day03.pstmt.member.controller.model.dao;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -9,17 +13,33 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import com.phwana.jdbc.day03.pstmt.member.controller.model.vo.Member;
 
 
 public class MemberDAO {
 
-	private static final String DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";
-	private static final String URL = "jdbc:oracle:thin:@127.0.0.1:1521:xe";
-	private static final String USERNAME = "KH";
-	private static final String PASSWORD = "KH";
-
+//	private static final String DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";
+//	private static final String URL = "jdbc:oracle:thin:@127.0.0.1:1521:xe";
+//	private static final String USERNAME = "KH";
+//	private static final String PASSWORD = "KH";
+	private static final String FILE_NAME = "resources/query.properties";
+	private Properties prop;
+	
+	public MemberDAO() {
+		try {
+			Reader reader = new FileReader(FILE_NAME);
+			prop = new Properties();
+			prop.load(reader);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 		/*
 		 * 1. Query문에 위치홀치(??)
@@ -29,17 +49,18 @@ public class MemberDAO {
 		 */
 		
 		// 회원 가입
-		public int insertMember(Member member) {
+		public int insertMember(Connection conn, Member member) {
 			String query = "INSERT INTO MEMBER_TBL(MEMBER_ID, MEMBER_PWD, MEMBER_NAME, AGE)"
 					+ " VALUES('"+member.getMemberId()+"', '"+member.getMemberPwd()+"', '"+member.getMemberName()+"', "+member.getAge()+")";
 			query = "INSERT INTO MEMBER_TBL(MEMBER_ID, MEMBER_PWD, MEMBER_NAME, GENDER, AGE)"
 					+ " VALUES(?, ?, ?, ?, ?)";
+			query = prop.getProperty("insertMember");
 			int result = 0;
-			Connection conn = null;
+//			Connection conn = null;
 			Statement stmt = null;
 			PreparedStatement pstmt = null;
 			try {
-				conn = this.getConnection();
+//				conn = this.getConnection();
 				stmt = conn.createStatement();
 				result = stmt.executeUpdate(query); // 여기서 예외가 발생하면 close() 코드는 실행되지 않음.
 				pstmt = conn.prepareStatement(query);
@@ -47,11 +68,10 @@ public class MemberDAO {
 				pstmt.setString(2, member.getMemberPwd());
 				pstmt.setString(3, member.getMemberName());
 				pstmt.setString(4, member.getGender());
-				pstmt.setInt(5, member.getAge());//순서 상관없다
 				
 				result = pstmt.executeUpdate();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+//			} catch (ClassNotFoundException e) {
+//				e.printStackTrace();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
@@ -67,11 +87,9 @@ public class MemberDAO {
 			}
 			return result;
 		}
-		
-		
 
 		// 회원정보 수정
-		public int updateMember(Member member) {
+		public int updateMember(Connection conn, Member member) {
 			int result = 0;
 //			String query = "UPDATE MEMBER_TBL SET MEMBER_PWD = '"+member.getMemberPwd()
 //												+"', EMAIL = '"+member.getEmail()
@@ -80,11 +98,12 @@ public class MemberDAO {
 //												+"', HOBBY = '"+member.getHobby()
 //												+"' WHERE MEMBER_ID = '"+member.getMemberId()+"'";
 			String query = "UPDATE MEMBER_TBL SET MEMBER_PWD = ?, EMAIL =?, PHONE = ?, ADDRESS = ?, HOBBY = ? WHERE MEMBER_ID = ?";
-			Connection conn = null;
+			query = prop.getProperty("updateMember");
+//			Connection conn = null;
 			Statement stmt = null;
 			PreparedStatement pstmt = null;
 			try {
-				conn = this.getConnection();
+//				conn = this.getConnection();
 				stmt = conn.createStatement();
 				// 쿼리문 실행 코드 누락 주의!!
 				pstmt = conn.prepareStatement(query);
@@ -98,8 +117,8 @@ public class MemberDAO {
 				// 쿼리문 실행 코드 누락 주의!!
 				//result = stmt.executeUpdate(query);
 				result = pstmt.executeUpdate(query);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+//			} catch (ClassNotFoundException e) {
+//				e.printStackTrace();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
@@ -116,24 +135,25 @@ public class MemberDAO {
 			return result;
 		}
 		
-		public int deleteMember(String memberId) {
+		public int deleteMember(Connection conn, String memberId) {
 			int result = 0;
 			String query = "DELETE FROM MEMBER_TBL WHERE LOWER(MEMBER_ID) = LOWER('"+memberId+"')";
 			query = "DELETE FROM MEMBER_TBL WHERE LOWER(MEMBER_ID) = ?";
-			Connection conn = null;
+			query = prop.getProperty("deleteMember");
+//			Connection conn = null;
 			Statement stmt = null;
 			PreparedStatement pstmt = null;
 			try {
-				conn = this.getConnection();
+//				conn = this.getConnection();
 				// Statement 생성
 				stmt = conn.createStatement();
 				pstmt = conn.prepareStatement(query);
 				pstmt.setString(1, memberId);
 				// 쿼리문 실행
 				result = pstmt.executeUpdate(query);
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+//			} catch (ClassNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -152,15 +172,16 @@ public class MemberDAO {
 		}
 		
 		// 회원 전체 정보 조회
-		public List<Member> selectList() {
+		public List<Member> selectList(Connection conn) {
 			List<Member> mList = new ArrayList<Member>();
 //			String query = "SELECT * FROM MEMBER_TBL";
 			String query = "SELECT * FROM MEMBER_TBL ORDER BY ENROLL_DATE DESC";
-			Connection conn = null;
+			query = prop.getProperty("selectList");
+//			Connection conn = null;
 			Statement stmt = null;
 			ResultSet rset = null;
 			try {
-				conn = this.getConnection();
+//				conn = this.getConnection();
 				stmt = conn.createStatement();
 				rset = stmt.executeQuery(query);
 				// rset에 테이블형태로 데이터가 있으나 그대로 사용못함
@@ -172,8 +193,8 @@ public class MemberDAO {
 					// mList에 담을 수 있도록 add 해줌
 					mList.add(member);
 				}
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+//			} catch (ClassNotFoundException e) {
+//				e.printStackTrace();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
@@ -193,17 +214,18 @@ public class MemberDAO {
 		}
 
 		// 회원 아이디로 검색
-		public Member selectOneById(String memberId) {
+		public Member selectOneById(Connection conn, String memberId) {
 			// 실행 쿼리문
 			String query = "SELECT * FROM MEMBER_TBL WHERE MEMBER_ID = '"+memberId+"'";
 			query = "SELECT * FROM MEMBER_TBL WHERE MEMBER_ID =?";//(1)
+			query = prop.getProperty("selectOneById");
 			Member member = null;
-			Connection conn = null;
+//			Connection conn = null;
 			Statement stmt = null;
 			PreparedStatement pstmt = null;//(2)
 			ResultSet rset = null;
 			try {
-				conn = this.getConnection();
+//				conn = this.getConnection();
 				// 쿼리문 실행
 				stmt = conn.createStatement(); // SQL문 실행하기 위한 객체
 				pstmt = conn.prepareStatement(query);//(3)
@@ -216,8 +238,8 @@ public class MemberDAO {
 				if(rset.next()) {
 					member = this.rsetToMember(rset);
 				}
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+//			} catch (ClassNotFoundException e) {
+//				e.printStackTrace();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
@@ -256,9 +278,9 @@ public class MemberDAO {
 		return member;
 	}
 	
-	private Connection getConnection() throws ClassNotFoundException, SQLException {
-		Class.forName(DRIVER_NAME);
-		Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-		return conn;
-	}
+//	private Connection getConnection() throws ClassNotFoundException, SQLException {
+//		Class.forName(DRIVER_NAME);
+//		Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+//		return conn;
+//	}->JDBCTemplate으로 감
 }
